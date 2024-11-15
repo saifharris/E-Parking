@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  # Node.js service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+    environment:
+      - mongodb+srv://harrissaif01:harris1234@cluster0.i5ngqeq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0  # MongoDB connection URI
+    networks:
+      - app-network
+
+  # MongoDB service
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+# Define shared network
+networks:
+  app-network:
+
+# Define shared volume for MongoDB data persistence
+volumes:
+  mongo-data:
