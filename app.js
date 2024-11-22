@@ -1,5 +1,3 @@
-// app.js
-
 const express = require('express');
 const mongoose = require('mongoose');
 const ParkingSlot = require('./models/ParkingSlot');
@@ -9,20 +7,29 @@ const Payment = require('./models/Payment');
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // For parsing form data
+app.set('view engine', 'ejs'); // Set EJS as the template engine
+app.use(express.static('public')); // Serve static files from "public" folder
 
 const port = 3000;
 
 // Connect to MongoDB
-mongoose.connect( process.env.MONGO_URI ||'mongodb+srv://harrissaif01:harris1234@cluster0.i5ngqeq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://harrissaif01:harris1234@cluster0.i5ngqeq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
     useNewUrlParser: true,
     useUnifiedTopology: true
-}).then(() => console.log("Connected to MongoDB"))
-  .catch((error) => console.error("MongoDB connection error:", error));
+})
+    .then(() => console.log("Connected to MongoDB"))
+    .catch((error) => console.error("MongoDB connection error:", error));
 
-// 1. Parking Slot Management Service
+// 1. Home Page
+app.get('/', (req, res) => {
+    res.render('index'); // Render the "index.ejs" file
+});
+
+// 2. Parking Slot Management Service
 app.get('/parking-slots', async (req, res) => {
     const slots = await ParkingSlot.find();
-    res.json(slots);
+    res.render('parking-slots', { slots });
 });
 
 app.post('/parking-slots/book', async (req, res) => {
@@ -31,54 +38,51 @@ app.post('/parking-slots/book', async (req, res) => {
     if (slot && slot.status === 'available') {
         slot.status = 'occupied';
         await slot.save();
-        res.json({ message: 'Slot booked successfully', slot });
-    } else {
-        res.status(400).json({ error: 'Slot not available' });
     }
+    res.redirect('/parking-slots');
 });
 
-// 2. Violation Detection Service
+// 3. Violation Detection Service
 app.get('/violations', async (req, res) => {
     const violations = await Violation.find();
-    res.json(violations);
+    res.render('violations', { violations });
 });
 
 app.post('/violations/report', async (req, res) => {
     const violation = new Violation(req.body);
     await violation.save();
-    res.json({ message: 'Violation reported', violation });
+    res.redirect('/violations');
 });
 
-// 3. Challan Generation Service
+// 4. Challan Generation Service
+app.get('/challans', async (req, res) => {
+    const challans = await Challan.find();
+    res.render('challans', { challans });
+});
+
 app.post('/challans', async (req, res) => {
     const challan = new Challan(req.body);
     await challan.save();
-    res.json({ message: 'Challan generated', challan });
+    res.redirect('/challans');
 });
 
-// 4. Payment Service
+// 5. Payment Service
+app.get('/payments', async (req, res) => {
+    const payments = await Payment.find();
+    res.render('payments', { payments });
+});
+
 app.post('/payments/pay', async (req, res) => {
     const payment = new Payment(req.body);
     await payment.save();
-    res.json({ message: 'Payment successful', payment });
+    res.redirect('/payments');
 });
 
-app.get('/payments/status', async (req, res) => {
-    const payments = await Payment.find();
-    res.json(payments);
-});
-
-// 5. Reporting and Analytics Service
-app.get('/reports/violations', async (req, res) => {
+// 6. Reporting and Analytics Service
+app.get('/reports', async (req, res) => {
     const totalViolations = await Violation.countDocuments();
-    const violations = await Violation.find();
-    res.json({ totalViolations, violations });
-});
-
-app.get('/reports/payments', async (req, res) => {
     const totalPayments = await Payment.countDocuments();
-    const payments = await Payment.find();
-    res.json({ totalPayments, payments });
+    res.render('reports', { totalViolations, totalPayments });
 });
 
 // Start the server

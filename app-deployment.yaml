@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: e-parking-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: e-parking-app
+  template:
+    metadata:
+      labels:
+        app: e-parking-app
+    spec:
+      containers:
+      - name: e-parking-app
+        image: harrissaif01/e-parking-app:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: MONGO_URI
+          value: "mongodb://mongo:27017/e-parking"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: e-parking-app
+spec:
+  type: NodePort
+  ports:
+  - port: 3000
+    targetPort: 3000
+    nodePort: 30002
+  selector:
+    app: e-parking-app

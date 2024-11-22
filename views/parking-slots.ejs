@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parking Slots</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <h1>Parking Slots</h1>
+    <ul>
+        <% slots.forEach(slot => { %>
+            <li>
+                Slot ID: <%= slot.slotId %> - Status: <%= slot.status %>
+                <% if (slot.status === 'available') { %>
+                    <form action="/parking-slots/book" method="POST" style="display:inline;">
+                        <input type="hidden" name="slotId" value="<%= slot.slotId %>">
+                        <button type="submit">Book</button>
+                    </form>
+                <% } %>
+            </li>
+        <% }) %>
+    </ul>
+    <a href="/">Go Back</a>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Violations</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <h1>Violations</h1>
+    <ul>
+        <% violations.forEach(violation => { %>
+            <li><%= violation.description %> - <%= violation.date %></li>
+        <% }) %>
+    </ul>
+    <form action="/violations/report" method="POST">
+        <h2>Report a Violation</h2>
+        <textarea name="description" required placeholder="Describe the violation"></textarea>
+        <button type="submit">Report</button>
+    </form>
+    <a href="/">Go Back</a>
+</body>
+</html>
